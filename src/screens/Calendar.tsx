@@ -12,11 +12,23 @@ interface CalendarProps {
   onRefresh: () => void
 }
 
-export function Calendar({ challenge, onNavigate, onRefresh }: CalendarProps) {
-  const [selectedDay, setSelectedDay] = useState<ChallengeDay | null>(null)
+interface CalendarCell {
+  date: number | null
+  day: ChallengeDay | null
+  isCurrentMonth: boolean
+}
+
+interface CalendarMonth {
+  key: string
+  name: string
+  cells: CalendarCell[]
+}
+
+function buildCalendarMonths(days: ChallengeDay[]): CalendarMonth[] {
+  if (days.length === 0) return []
 
   // Group days by month
-  const daysByMonth = challenge.days.reduce((acc, day) => {
+  const daysByMonth = days.reduce((acc, day) => {
     const date = new Date(day.date)
     const monthKey = `${date.getFullYear()}-${date.getMonth()}`
     if (!acc[monthKey]) {
@@ -25,6 +37,66 @@ export function Calendar({ challenge, onNavigate, onRefresh }: CalendarProps) {
     acc[monthKey].push(day)
     return acc
   }, {} as Record<string, ChallengeDay[]>)
+
+  // Build calendar grid for each month
+  return Object.entries(daysByMonth).map(([monthKey, monthDays]) => {
+    const firstDay = new Date(monthDays[0].date)
+    const year = firstDay.getFullYear()
+    const month = firstDay.getMonth()
+    
+    const monthName = firstDay.toLocaleDateString('en-US', { 
+      month: 'long', 
+      year: 'numeric' 
+    })
+
+    // Get first day of month and last day of month
+    const firstDayOfMonth = new Date(year, month, 1)
+    const lastDayOfMonth = new Date(year, month + 1, 0)
+    
+    // Get day of week for first day (0 = Sunday)
+    const firstDayOfWeek = firstDayOfMonth.getDay()
+    
+    // Create map of dates to challenge days
+    const dayMap = new Map<string, ChallengeDay>()
+    monthDays.forEach(day => {
+      const date = new Date(day.date)
+      const dateKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
+      dayMap.set(dateKey, day)
+    })
+
+    // Build calendar cells
+    const cells: CalendarCell[] = []
+    
+    // Add empty cells for days before month starts
+    for (let i = 0; i < firstDayOfWeek; i++) {
+      cells.push({ date: null, day: null, isCurrentMonth: false })
+    }
+    
+    // Add cells for each day of the month
+    for (let date = 1; date <= lastDayOfMonth.getDate(); date++) {
+      const dateKey = `${year}-${month}-${date}`
+      const challengeDay = dayMap.get(dateKey)
+      
+      cells.push({
+        date,
+        day: challengeDay || null,
+        isCurrentMonth: true
+      })
+    }
+    
+    return {
+      key: monthKey,
+      name: monthName,
+      cells
+    }
+  })
+}
+
+export function Calendar({ challenge, onNavigate, onRefresh }: CalendarProps) {
+  const [selectedDay, setSelectedDay] = useState<ChallengeDay | null>(null)
+
+  // Group days by month and build proper calendar grid
+  const calendarMonths = buildCalendarMonths(challenge.days)
 
   const handleDayClick = (day: ChallengeDay) => {
     const today = new Date()
@@ -77,8 +149,8 @@ export function Calendar({ challenge, onNavigate, onRefresh }: CalendarProps) {
             <ChevronLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-xl lg:text-2xl font-bold">90 Days</h1>
-            <p className="text-sm text-muted-foreground">Click any past day to update its status</p>
+            <h1 className="text-xl lg:text-2xl font-bold">Calendar</h1>
+            <p className="text-sm text-muted-foreground">Track your gym days and rest days</p>
           </div>
         </div>
       </header>
@@ -88,37 +160,40 @@ export function Calendar({ challenge, onNavigate, onRefresh }: CalendarProps) {
         <div className="bg-card border border-border rounded-xl p-4 lg:p-6">
           <h3 className="font-semibold mb-4">Legend</h3>
           <div className="flex flex-wrap gap-4 text-sm">
-            <LegendItem color="bg-primary" label="Completed" />
-            <LegendItem color="bg-destructive" label="Skipped" />
-            <LegendItem color="bg-blue-500" label="Today" />
-            <LegendItem color="bg-muted" label="Rest" />
-            <LegendItem color="bg-secondary border border-border" label="Future" />
+            <LegendItem color="bg-primary" label="Gym Day (Completed)" icon="✓" />
+            <LegendItem color="bg-destructive" label="Skipped" icon="✕" />
+            <LegendItem color="bg-blue-500" label="Today" icon="●" />
+            <LegendItem color="bg-muted" label="Rest Day" icon="○" />
+            <LegendItem color="bg-secondary border border-border" label="Future / Not Set" />
           </div>
         </div>
 
         {/* Calendar Grid */}
-        {Object.entries(daysByMonth).map(([monthKey, days]) => {
-          const monthDate = new Date(days[0].date)
-          const monthName = monthDate.toLocaleDateString('en-US', { 
-            month: 'long', 
-            year: 'numeric' 
-          })
-
-          return (
-            <div key={monthKey} className="space-y-4">
-              <h2 className="text-lg font-semibold">{monthName}</h2>
-              <div className="grid grid-cols-7 gap-2 lg:gap-3">
-                {days.map((day) => (
-                  <DayCell 
-                    key={day.dayNumber} 
-                    day={day} 
-                    onClick={() => handleDayClick(day)}
-                  />
-                ))}
-              </div>
+        {calendarMonths.map((month) => (
+          <div key={month.key} className="bg-card border border-border rounded-xl p-4 lg:p-6 space-y-4">
+            <h2 className="text-lg font-semibold">{month.name}</h2>
+            
+            {/* Day headers */}
+            <div className="grid grid-cols-7 gap-2 lg:gap-3">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((dayName) => (
+                <div key={dayName} className="text-center text-xs font-medium text-muted-foreground py-2">
+                  {dayName}
+                </div>
+              ))}
             </div>
-          )
-        })}
+            
+            {/* Calendar cells */}
+            <div className="grid grid-cols-7 gap-2 lg:gap-3">
+              {month.cells.map((cell, idx) => (
+                <CalendarCell 
+                  key={idx} 
+                  cell={cell}
+                  onClick={() => cell.day && handleDayClick(cell.day)}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Day Detail Modal */}
@@ -133,14 +208,15 @@ export function Calendar({ challenge, onNavigate, onRefresh }: CalendarProps) {
           >
             <div className="space-y-4">
               <div>
-                <h3 className="text-2xl font-bold">Day {selectedDay.dayNumber}</h3>
-                <p className="text-muted-foreground">
+                <p className="text-sm text-muted-foreground mb-1">Day {selectedDay.dayNumber} of 90</p>
+                <h3 className="text-2xl font-bold">
                   {new Date(selectedDay.date).toLocaleDateString('en-US', { 
                     weekday: 'long', 
                     month: 'long', 
-                    day: 'numeric' 
+                    day: 'numeric',
+                    year: 'numeric'
                   })}
-                </p>
+                </h3>
               </div>
 
               {selectedDay.plannedWorkoutId && (
@@ -196,23 +272,33 @@ export function Calendar({ challenge, onNavigate, onRefresh }: CalendarProps) {
 interface LegendItemProps {
   color: string
   label: string
+  icon?: string
 }
 
-function LegendItem({ color, label }: LegendItemProps) {
+function LegendItem({ color, label, icon }: LegendItemProps) {
   return (
     <div className="flex items-center gap-2">
-      <div className={cn("w-4 h-4 rounded", color)} />
+      <div className={cn("w-6 h-6 rounded flex items-center justify-center text-xs font-semibold", color)}>
+        {icon || ''}
+      </div>
       <span className="text-muted-foreground">{label}</span>
     </div>
   )
 }
 
-interface DayCellProps {
-  day: ChallengeDay
+interface CalendarCellProps {
+  cell: CalendarCell
   onClick: () => void
 }
 
-function DayCell({ day, onClick }: DayCellProps) {
+function CalendarCell({ cell, onClick }: CalendarCellProps) {
+  // Empty cell (padding for calendar grid)
+  if (!cell.date || !cell.day) {
+    return <div className="aspect-square" />
+  }
+
+  const { day, date } = cell
+
   const getStatusColor = () => {
     switch (day.status) {
       case 'completed':
@@ -236,7 +322,7 @@ function DayCell({ day, onClick }: DayCellProps) {
       case 'skipped':
         return '✕'
       case 'today':
-        return '◉'
+        return '●'
       case 'rest':
         return '○'
       default:
@@ -255,14 +341,17 @@ function DayCell({ day, onClick }: DayCellProps) {
       onClick={onClick}
       disabled={!isClickable}
       className={cn(
-        "aspect-square rounded-lg font-semibold text-sm transition-all flex flex-col items-center justify-center gap-0.5",
+        "aspect-square rounded-lg font-semibold text-sm transition-all flex flex-col items-center justify-center gap-0.5 relative",
         getStatusColor(),
         isClickable ? "hover:scale-105 cursor-pointer" : "cursor-not-allowed opacity-50"
       )}
     >
-      <span className="text-xs opacity-70">{day.dayNumber}</span>
+      <span className="text-base">{date}</span>
       {getStatusEmoji() && (
-        <span className="text-lg leading-none">{getStatusEmoji()}</span>
+        <span className="text-xs leading-none opacity-80">{getStatusEmoji()}</span>
+      )}
+      {day.plannedWorkoutId && (
+        <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-current rounded-full opacity-60" />
       )}
     </button>
   )
