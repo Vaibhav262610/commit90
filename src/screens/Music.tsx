@@ -415,6 +415,7 @@ export function Music({ onNavigate }: MusicProps) {
             <div className="space-y-3">
               {settings.musicLinks.map((link) => {
                 const isAudioFile = link.url.match(/\.(mp3|wav|ogg|m4a)$/i)
+                const isEmbeddable = link.type === 'youtube' || link.type === 'spotify'
                 const isCurrentTrack = currentTrack?.id === link.id
 
                 return (
@@ -427,8 +428,8 @@ export function Music({ onNavigate }: MusicProps) {
                     <div className="text-2xl">{getTypeIcon(link.type)}</div>
                     <div className="flex-1">
                       <div className="font-medium">{link.name}</div>
-                      <div className="text-sm text-muted-foreground truncate">
-                        {isAudioFile ? 'Direct audio file' : link.type}
+                      <div className="text-sm text-muted-foreground">
+                        {isAudioFile ? 'Audio file' : isEmbeddable ? `${link.type} (embedded)` : link.type}
                       </div>
                     </div>
                     <button
@@ -507,17 +508,17 @@ export function Music({ onNavigate }: MusicProps) {
 
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  URL (MP3, YouTube, Spotify, etc.)
+                  URL (YouTube, Spotify, MP3, etc.)
                 </label>
                 <input
                   type="url"
-                  placeholder="https://example.com/song.mp3"
+                  placeholder="https://youtube.com/playlist?list=..."
                   value={newLink.url}
                   onChange={(e) => setNewLink({ ...newLink, url: e.target.value })}
                   className="w-full h-12 px-4 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <p className="text-xs text-muted-foreground mt-2">
-                  Direct audio files (.mp3, .wav) will play in-app. Other links open in new tab.
+                  YouTube playlists/videos and Spotify playlists play embedded. MP3 files use audio player.
                 </p>
               </div>
 

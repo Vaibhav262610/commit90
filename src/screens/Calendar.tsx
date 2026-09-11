@@ -32,8 +32,8 @@ export function Calendar({ challenge, onNavigate, onRefresh }: CalendarProps) {
     const dayDate = new Date(day.date)
     dayDate.setHours(0, 0, 0, 0)
 
-    // Only allow interaction with past days and today
-    if (dayDate.getTime() <= today.getTime()) {
+    // Allow interaction with today and all past days
+    if (dayDate.getTime() <= today.getTime() && day.status !== 'future') {
       setSelectedDay(day)
     }
   }
@@ -248,7 +248,7 @@ function DayCell({ day, onClick }: DayCellProps) {
   today.setHours(0, 0, 0, 0)
   const dayDate = new Date(day.date)
   dayDate.setHours(0, 0, 0, 0)
-  const isClickable = dayDate.getTime() <= today.getTime()
+  const isClickable = dayDate.getTime() <= today.getTime() && day.status !== 'future'
 
   return (
     <button

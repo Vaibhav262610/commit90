@@ -26,7 +26,54 @@ export function Settings({ challenge, onNavigate, onUpdate }: SettingsProps) {
 
   useEffect(() => {
     loadSettings()
+    requestNotificationPermission()
+    checkAndScheduleAlarms()
   }, [])
+
+  const requestNotificationPermission = async () => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      await Notification.requestPermission()
+    }
+  }
+
+  const checkAndScheduleAlarms = () => {
+    // Check alarms every minute
+    const interval = setInterval(() => {
+      checkAlarms()
+    }, 60000) // Check every minute
+
+    // Check immediately on load
+    checkAlarms()
+
+    return () => clearInterval(interval)
+  }
+
+  const checkAlarms = async () => {
+    const userSettings = await storageService.getSettings()
+    if (!userSettings.gymAlarms || userSettings.gymAlarms.length === 0) return
+
+    const now = new Date()
+    const currentDay = now.getDay()
+    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+
+    userSettings.gymAlarms.forEach(alarm => {
+      if (alarm.enabled && alarm.dayOfWeek === currentDay && alarm.time === currentTime) {
+        showNotification(alarm)
+      }
+    })
+  }
+
+  const showNotification = (alarm: GymAlarm) => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('💪 Gym Time!', {
+        body: alarm.label || 'Time for your workout!',
+        icon: '/favicon.svg',
+        badge: '/favicon.svg',
+        vibrate: [200, 100, 200],
+        tag: alarm.id,
+      })
+    }
+  }
 
   const loadSettings = async () => {
     const userSettings = await storageService.getSettings()
