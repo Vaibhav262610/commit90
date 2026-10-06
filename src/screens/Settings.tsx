@@ -348,7 +348,7 @@ export function Settings({ challenge, onNavigate, onUpdate }: SettingsProps) {
 
         {/* Footer */}
         <div className="text-center text-sm text-muted-foreground pt-6">
-          <p>Project 90</p>
+          <p>Commit90</p>
           <p className="mt-1">Built for those who commit.</p>
         </div>
       </div>

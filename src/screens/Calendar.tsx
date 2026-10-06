@@ -104,8 +104,8 @@ export function Calendar({ challenge, onNavigate, onRefresh }: CalendarProps) {
     const dayDate = new Date(day.date)
     dayDate.setHours(0, 0, 0, 0)
 
-    // Allow interaction with today and all past days
-    if (dayDate.getTime() <= today.getTime() && day.status !== 'future') {
+    // Allow interaction with today and all past days (not future)
+    if (dayDate.getTime() <= today.getTime()) {
       setSelectedDay(day)
     }
   }
@@ -138,45 +138,33 @@ export function Calendar({ challenge, onNavigate, onRefresh }: CalendarProps) {
   }
 
   return (
-    <div className="min-h-screen pb-6">
+    <div className="min-h-screen pb-6 bg-background">
       {/* Header */}
-      <header className="sticky top-0 bg-background/95 backdrop-blur z-10 border-b border-border">
-        <div className="max-w-7xl mx-auto flex items-center gap-3 p-4 lg:p-6">
+      <header className="sticky top-0 bg-background/95 backdrop-blur-sm z-10 border-b border-border/40">
+        <div className="max-w-6xl mx-auto flex items-center gap-3 p-4 lg:p-6">
           <button
             onClick={() => onNavigate('home')}
-            className="lg:hidden w-10 h-10 flex items-center justify-center rounded-lg hover:bg-secondary transition-colors"
+            className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl hover:bg-secondary/80 transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-xl lg:text-2xl font-bold">Calendar</h1>
-            <p className="text-sm text-muted-foreground">Track your gym days and rest days</p>
+            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">Calendar</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">Track your workout journey</p>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto p-4 lg:p-8 space-y-8">
-        {/* Legend */}
-        <div className="bg-card border border-border rounded-xl p-4 lg:p-6">
-          <h3 className="font-semibold mb-4">Legend</h3>
-          <div className="flex flex-wrap gap-4 text-sm">
-            <LegendItem color="bg-primary" label="Gym Day (Completed)" icon="✓" />
-            <LegendItem color="bg-destructive" label="Skipped" icon="✕" />
-            <LegendItem color="bg-blue-500" label="Today" icon="●" />
-            <LegendItem color="bg-muted" label="Rest Day" icon="○" />
-            <LegendItem color="bg-secondary border border-border" label="Future / Not Set" />
-          </div>
-        </div>
-
+      <div className="max-w-6xl mx-auto p-4 lg:p-6 space-y-6">
         {/* Calendar Grid */}
         {calendarMonths.map((month) => (
-          <div key={month.key} className="bg-card border border-border rounded-xl p-4 lg:p-6 space-y-4">
-            <h2 className="text-lg font-semibold">{month.name}</h2>
+          <div key={month.key} className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-5 lg:p-7 shadow-sm">
+            <h2 className="text-xl font-semibold mb-5 tracking-tight">{month.name}</h2>
             
             {/* Day headers */}
-            <div className="grid grid-cols-7 gap-2 lg:gap-3">
+            <div className="grid grid-cols-7 gap-2 lg:gap-3 mb-2">
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((dayName) => (
-                <div key={dayName} className="text-center text-xs font-medium text-muted-foreground py-2">
+                <div key={dayName} className="text-center text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider py-2">
                   {dayName}
                 </div>
               ))}
@@ -199,17 +187,17 @@ export function Calendar({ challenge, onNavigate, onRefresh }: CalendarProps) {
       {/* Day Detail Modal */}
       {selectedDay && (
         <div 
-          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-end lg:items-center justify-center p-4"
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-end lg:items-center justify-center p-4 animate-in fade-in duration-200"
           onClick={() => setSelectedDay(null)}
         >
           <div 
-            className="bg-card border border-border rounded-2xl p-6 w-full max-w-md shadow-2xl"
+            className="bg-card border border-border/50 rounded-3xl p-6 w-full max-w-md shadow-2xl animate-in slide-in-from-bottom-4 lg:slide-in-from-bottom-0 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Day {selectedDay.dayNumber} of 90</p>
-                <h3 className="text-2xl font-bold">
+            <div className="space-y-5">
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Day {selectedDay.dayNumber} of 90</p>
+                <h3 className="text-2xl font-bold tracking-tight">
                   {new Date(selectedDay.date).toLocaleDateString('en-US', { 
                     weekday: 'long', 
                     month: 'long', 
@@ -220,44 +208,45 @@ export function Calendar({ challenge, onNavigate, onRefresh }: CalendarProps) {
               </div>
 
               {selectedDay.plannedWorkoutId && (
-                <div className="p-4 bg-secondary rounded-lg">
-                  <div className="text-sm text-muted-foreground mb-1">Planned Workout</div>
-                  <div className="font-semibold">
+                <div className="p-4 bg-secondary/50 rounded-xl border border-border/30">
+                  <div className="text-xs text-muted-foreground mb-1.5 font-medium uppercase tracking-wider">Planned Workout</div>
+                  <div className="font-semibold text-foreground">
                     {getWorkoutForDay(challenge, selectedDay.dayNumber)?.name || 'Unknown'}
                   </div>
                 </div>
               )}
 
-              <div className="text-sm text-muted-foreground">
-                Current status: <span className="font-medium text-foreground capitalize">{selectedDay.status}</span>
+              <div className="text-sm">
+                <span className="text-muted-foreground">Current status: </span>
+                <span className="font-semibold text-foreground capitalize">{selectedDay.status === 'future' ? 'not set' : selectedDay.status}</span>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2.5 pt-2">
                 <button
                   onClick={handleMarkComplete}
-                  className="w-full h-12 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                  className="w-full h-12 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm"
                 >
                   <Check className="w-5 h-5" />
-                  Mark as Completed
+                  Completed
                 </button>
                 <button
                   onClick={handleMarkSkipped}
-                  className="w-full h-12 bg-destructive/10 text-destructive border border-destructive/20 rounded-lg font-medium hover:bg-destructive/20 transition-colors flex items-center justify-center gap-2"
+                  className="w-full h-12 bg-destructive/10 text-destructive border border-destructive/30 rounded-xl font-semibold hover:bg-destructive/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                 >
                   <X className="w-5 h-5" />
-                  Mark as Skipped
+                  Skipped
                 </button>
                 <button
                   onClick={handleMarkRest}
-                  className="w-full h-12 bg-secondary rounded-lg font-medium hover:bg-secondary/80 transition-colors"
+                  className="w-full h-12 bg-secondary/80 border border-border/40 text-foreground rounded-xl font-semibold hover:bg-secondary active:scale-[0.98] transition-all"
                 >
-                  Mark as Rest Day
+                  Rest Day
                 </button>
               </div>
 
               <button
                 onClick={() => setSelectedDay(null)}
-                className="w-full h-10 text-muted-foreground hover:text-foreground transition-colors"
+                className="w-full h-11 text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
               >
                 Cancel
               </button>
@@ -265,23 +254,6 @@ export function Calendar({ challenge, onNavigate, onRefresh }: CalendarProps) {
           </div>
         </div>
       )}
-    </div>
-  )
-}
-
-interface LegendItemProps {
-  color: string
-  label: string
-  icon?: string
-}
-
-function LegendItem({ color, label, icon }: LegendItemProps) {
-  return (
-    <div className="flex items-center gap-2">
-      <div className={cn("w-6 h-6 rounded flex items-center justify-center text-xs font-semibold", color)}>
-        {icon || ''}
-      </div>
-      <span className="text-muted-foreground">{label}</span>
     </div>
   )
 }
@@ -302,31 +274,41 @@ function CalendarCell({ cell, onClick }: CalendarCellProps) {
   const getStatusColor = () => {
     switch (day.status) {
       case 'completed':
-        return 'bg-primary text-primary-foreground'
+        return 'bg-primary/90 text-primary-foreground shadow-sm border-primary/20'
       case 'skipped':
-        return 'bg-destructive text-destructive-foreground'
+        return 'bg-destructive/90 text-destructive-foreground shadow-sm border-destructive/20'
       case 'today':
-        return 'bg-blue-500 text-white ring-2 ring-blue-400 ring-offset-2 ring-offset-background'
+        return 'bg-blue-500 text-white shadow-md shadow-blue-500/20 ring-2 ring-blue-400/50 ring-offset-2 ring-offset-background'
       case 'rest':
-        return 'bg-muted text-muted-foreground'
+        return 'bg-muted/80 text-muted-foreground border-border/40'
       case 'future':
       default:
-        return 'bg-secondary text-muted-foreground border border-border'
+        return 'bg-secondary/60 text-muted-foreground/70 border-border/30'
     }
   }
 
-  const getStatusEmoji = () => {
+  const getStatusIcon = () => {
     switch (day.status) {
       case 'completed':
-        return '✓'
+        return (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Check className="w-4 h-4 opacity-90" />
+          </div>
+        )
       case 'skipped':
-        return '✕'
+        return (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <X className="w-4 h-4 opacity-90" />
+          </div>
+        )
       case 'today':
-        return '●'
-      case 'rest':
-        return '○'
+        return (
+          <div className="absolute top-1 right-1">
+            <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+          </div>
+        )
       default:
-        return ''
+        return null
     }
   }
 
@@ -334,25 +316,29 @@ function CalendarCell({ cell, onClick }: CalendarCellProps) {
   today.setHours(0, 0, 0, 0)
   const dayDate = new Date(day.date)
   dayDate.setHours(0, 0, 0, 0)
-  const isClickable = dayDate.getTime() <= today.getTime() && day.status !== 'future'
+  const isPast = dayDate.getTime() < today.getTime()
+  const isToday = dayDate.getTime() === today.getTime()
+  const isFuture = dayDate.getTime() > today.getTime()
+  const isClickable = !isFuture
 
   return (
     <button
       onClick={onClick}
       disabled={!isClickable}
       className={cn(
-        "aspect-square rounded-lg font-semibold text-sm transition-all flex flex-col items-center justify-center gap-0.5 relative",
+        "aspect-square rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center relative border group",
         getStatusColor(),
-        isClickable ? "hover:scale-105 cursor-pointer" : "cursor-not-allowed opacity-50"
+        isClickable 
+          ? "hover:scale-105 hover:shadow-lg cursor-pointer active:scale-95" 
+          : "cursor-not-allowed opacity-40"
       )}
     >
-      <span className="text-base">{date}</span>
-      {getStatusEmoji() && (
-        <span className="text-xs leading-none opacity-80">{getStatusEmoji()}</span>
-      )}
-      {day.plannedWorkoutId && (
-        <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-current rounded-full opacity-60" />
+      <span className="text-base font-semibold relative z-10">{date}</span>
+      {getStatusIcon()}
+      {day.plannedWorkoutId && day.status === 'future' && (
+        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-current rounded-full opacity-50" />
       )}
     </button>
   )
 }
+

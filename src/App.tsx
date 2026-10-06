@@ -8,11 +8,14 @@ import { Settings } from './screens/Settings'
 import { WorkoutPreview } from './screens/WorkoutPreview'
 import { ActiveWorkout } from './screens/ActiveWorkout'
 import { Music } from './screens/Music'
+import { Login } from './screens/Login'
+import { Profile } from './screens/Profile'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { storageService } from './services/storage'
 import type { Challenge, WorkoutPlan } from './types'
 import { initializeChallengeDays } from './utils/challengeUtils'
 
-export type Screen = 'home' | 'calendar' | 'planner' | 'progress' | 'settings' | 'music' | 'workout-preview' | 'active-workout'
+export type Screen = 'home' | 'calendar' | 'planner' | 'progress' | 'settings' | 'music' | 'workout-preview' | 'active-workout' | 'profile'
 
 const defaultWorkoutPlans: WorkoutPlan[] = [
   {
@@ -64,14 +67,19 @@ const defaultWorkoutPlans: WorkoutPlan[] = [
   },
 ]
 
-function App() {
+function AppContent() {
+  const { currentUser } = useAuth()
   const [challenge, setChallenge] = useState<Challenge | null>(null)
   const [loading, setLoading] = useState(true)
   const [currentScreen, setCurrentScreen] = useState<Screen>('home')
 
   useEffect(() => {
-    loadOrCreateChallenge()
-  }, [])
+    if (currentUser) {
+      loadOrCreateChallenge()
+    } else {
+      setLoading(false)
+    }
+  }, [currentUser])
 
   const loadOrCreateChallenge = async () => {
     try {
@@ -120,10 +128,15 @@ function App() {
     await loadOrCreateChallenge()
   }
 
+  // Show login screen if not authenticated
+  if (!currentUser) {
+    return <Login />
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-muted-foreground">Loading...</div>
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
@@ -154,6 +167,8 @@ function App() {
         return <WorkoutPreview challenge={challenge} onNavigate={setCurrentScreen} />
       case 'active-workout':
         return <ActiveWorkout challenge={challenge} onNavigate={setCurrentScreen} onComplete={refreshChallenge} />
+      case 'profile':
+        return <Profile onNavigate={setCurrentScreen} />
       default:
         return <Home challenge={challenge} onNavigate={setCurrentScreen} onRefresh={refreshChallenge} />
     }
@@ -163,6 +178,14 @@ function App() {
     <Layout currentScreen={currentScreen} onNavigate={setCurrentScreen}>
       {renderScreen()}
     </Layout>
+  )
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   )
 }
 

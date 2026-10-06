@@ -359,3 +359,126 @@ Built with:
 Designed for mobile-first experiences and those who commit to their goals.
 
 **Now go start your 90 days. 💪**
+
+
+---
+
+## 🆕 New Features Added
+
+### 🔐 Authentication
+- **Google Sign-In** - Secure authentication using Firebase
+- Professional login screen with modern UI
+- Persistent sessions - stay logged in across visits
+
+### 👤 User Profile & Measurements
+- **Comprehensive Profile Management**:
+  - Basic info: Age, Gender, Height, Target Weight
+  - Fitness goals and activity level tracking
+  
+- **Body Measurements Tracking**:
+  - Weight (kg)
+  - Chest, Waist, Hips (cm)
+  - Biceps, Forearms (cm)
+  - Thighs, Calves (cm)
+  - Shoulders, Neck (cm)
+  
+- **Measurement History**:
+  - Save measurements with timestamps
+  - Track progress over time
+  - View historical data
+
+### 🗄️ Cloud Database (Firebase)
+- **Data Sync**: All data automatically synced across devices
+- **Secure Storage**: Firestore database with user-specific rules
+- **Offline Support**: Works offline, syncs when online
+- **Real-time Updates**: Changes reflect immediately
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 16+ installed
+- Firebase account (free tier works perfectly)
+
+### Installation
+
+1. **Clone and Install**:
+```bash
+git clone <your-repo-url>
+cd commit90
+npm install
+```
+
+2. **Install Firebase**:
+```bash
+npm install firebase
+```
+
+3. **Configure Firebase**:
+   - See [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) for detailed instructions
+   - Update `src/config/firebase.ts` with your Firebase credentials
+
+4. **Run Development Server**:
+```bash
+npm run dev
+```
+
+5. **Build for Production**:
+```bash
+npm run build
+```
+
+---
+
+## 📖 Documentation
+
+- **[FIREBASE_SETUP.md](./FIREBASE_SETUP.md)** - Complete Firebase setup guide
+- **[NEW_FEATURES.md](./NEW_FEATURES.md)** - Detailed feature documentation
+- **[CHANGELOG.md](./CHANGELOG.md)** - Version history
+
+---
+
+## 🔧 Tech Stack
+
+- **Frontend**: React 18 + TypeScript + Vite
+- **Styling**: TailwindCSS
+- **Authentication**: Firebase Auth (Google Sign-In)
+- **Database**: Firebase Firestore
+- **State Management**: React Context API
+- **Storage**: IndexedDB (local) + Firestore (cloud)
+- **Icons**: Lucide React
+
+---
+
+## 📱 Responsive Design
+
+- **Mobile First**: Optimized for 375-430px width
+- **Tablet**: Enhanced layouts for larger screens
+- **Desktop**: Full sidebar navigation
+- **Bottom Navigation**: On mobile devices
+- **Adaptive UI**: Automatically adjusts to screen size
+
+---
+
+## 🎯 Roadmap
+
+- [ ] Measurement progress charts
+- [ ] Photo progress tracking
+- [ ] Exercise library with videos
+- [ ] Social sharing of progress
+- [ ] Workout templates marketplace
+- [ ] Nutrition tracking
+- [ ] Native mobile app (Capacitor)
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+## 🙏 Acknowledgments
+
+Built with modern web technologies to help you achieve your fitness goals. 90 days to transform yourself - one workout at a time.

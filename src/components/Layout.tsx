@@ -1,4 +1,4 @@
-import { Home, Calendar, Dumbbell, TrendingUp, Music2 } from 'lucide-react'
+import { Home, Calendar, Dumbbell, TrendingUp, Music2, User } from 'lucide-react'
 import { cn } from '../utils/cn'
 import type { Screen } from '../App'
 
@@ -52,6 +52,12 @@ export function Layout({ children, currentScreen, onNavigate }: LayoutProps) {
               active={currentScreen === 'music'}
               onClick={() => onNavigate('music')}
             />
+            <NavItem
+              icon={User}
+              label="Profile"
+              active={currentScreen === 'profile'}
+              onClick={() => onNavigate('profile')}
+            />
           </div>
         </nav>
       </aside>
@@ -94,6 +100,12 @@ export function Layout({ children, currentScreen, onNavigate }: LayoutProps) {
               label="Music"
               active={currentScreen === 'music'}
               onClick={() => onNavigate('music')}
+            />
+            <NavButton
+              icon={User}
+              label="Profile"
+              active={currentScreen === 'profile'}
+              onClick={() => onNavigate('profile')}
             />
           </div>
         </nav>
