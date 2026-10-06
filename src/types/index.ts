@@ -123,3 +123,32 @@ export interface UserSettings {
   spotifyConnected: boolean
   spotifyPlaylistUrl?: string
 }
+
+export interface UserProfile {
+  uid: string
+  email: string
+  displayName: string | null
+  photoURL: string | null
+  createdAt: string
+  // Body Measurements
+  currentWeight?: number
+  targetWeight?: number
+  height?: number
+  age?: number
+  gender?: 'male' | 'female' | 'other'
+  // Body measurements (in cm or inches based on settings)
+  chest?: number
+  waist?: number
+  hips?: number
+  biceps?: number
+  forearms?: number
+  thighs?: number
+  calves?: number
+  shoulders?: number
+  neck?: number
+  // Additional info
+  fitnessGoal?: 'lose_weight' | 'gain_muscle' | 'maintain' | 'get_fit'
+  activityLevel?: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active'
+  // Measurement history
+  measurementHistory?: ProgressMeasurement[]
+}
